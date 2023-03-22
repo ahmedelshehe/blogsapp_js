@@ -7,6 +7,15 @@ module.exports = {
 	},
 	'extends': 'eslint:recommended',
 	'overrides': [
+		{
+			'files': [
+				'**/*.test.js',
+				'**/*.test.jsx'
+			],
+			'env': {
+				'jest': true
+			}
+		}
 	],
 	'parserOptions': {
 		'ecmaVersion': 'latest'
