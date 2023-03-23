@@ -3,9 +3,23 @@ const supertest=require('supertest')
 const app=require('../app')
 const helper=require('./test_helper')
 const api =supertest(app)
+const User = require('../models/User')
+const Blog=require('../models/Blog')
+const bcrypt = require('bcrypt')
 
-const Blog=require('../models/blog')
+let token
 describe('Blogs Api Suite',() => {
+	beforeAll(async () => {
+		await User.deleteMany({})
+		const passwordHash = await bcrypt.hash('sekret', 10)
+		const user = new User({ username: 'root', passwordHash })
+		await user.save()
+		
+		const loggedInUser = await api.post('/api/login')
+			.send({username:'root',password : 'sekret'})
+		
+		token =`Bearer ${loggedInUser.body.token}`
+	})
 	beforeEach(async () => {
 		await Blog.deleteMany({})
 		const blogObjects=helper.initialBlogs.map(blog => new Blog(blog))
@@ -28,7 +42,7 @@ describe('Blogs Api Suite',() => {
 		expect(titles).toContain('Test Title 1')
 	})
 	test('a valid blog can be created', async() => {
-		await api.post('/api/blogs').send(helper.singleBlog).expect(201).expect('Content-Type', /application\/json/)
+		await api.post('/api/blogs').send(helper.singleBlog).set('Authorization', token).expect(201).expect('Content-Type', /application\/json/)
 		const blogsAtEnd=await helper.blogsInDb()
 		expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
 		const titles=blogsAtEnd.map(blog => blog.title)
@@ -40,7 +54,7 @@ describe('Blogs Api Suite',() => {
 
 	})
 	test('verifies that a blog created with no likes value , the likes value will default to 0', async () => {
-		const response =await api.post('/api/blogs').send(helper.blogWithNoLikes)
+		const response =await api.post('/api/blogs').set('Authorization', token).send(helper.blogWithNoLikes)
 		expect(response.body.likes).toEqual(0)
 	})
 	test('verifies that a blog created with no title or url value , the response status code will be 400', async () => {
@@ -48,14 +62,14 @@ describe('Blogs Api Suite',() => {
 		await api.post('/api/blogs').send(helper.blogWithNoUrl).expect(400)
 	})
 	test('verifies that a blog can be updated',async () => {
-		const response = await api.post('/api/blogs').send(helper.singleBlog)
-		const updatedBlog = await api.put('/api/blogs/'+response.body.id).send({ title: 'updated title' })
+		const response = await api.post('/api/blogs').send(helper.singleBlog).set('Authorization', token)
+		const updatedBlog = await api.put('/api/blogs/'+response.body.id).send({ title: 'updated title' }).set('Authorization', token)
 		expect(updatedBlog.body.title).toBe('updated title')
 	})
 	test('verifies that a blog can be deleted',async () => {
-		const response = await api.post('/api/blogs').send(helper.singleBlog)
+		const response = await api.post('/api/blogs').set('Authorization', token).send(helper.singleBlog)
 		const initialBlogs =await helper.blogsInDb()
-		await api.delete('/api/blogs/'+response.body.id).send({ title: 'updated title' }).expect(204)
+		await api.delete('/api/blogs/'+response.body.id).set('Authorization', token).send({ title: 'updated title' }).expect(204)
 		const endBlogs =await helper.blogsInDb()
 		expect(endBlogs.length).toBe(initialBlogs.length -1)
 	})

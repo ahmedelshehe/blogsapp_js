@@ -31,10 +31,6 @@ module.exports = {
 		],
 		'no-console': 0,
 		'indent': ['error', 'tab'],
-		'linebreak-style': [
-			'error',
-			'unix'
-		],
 		'quotes': [
 			'error',
 			'single'

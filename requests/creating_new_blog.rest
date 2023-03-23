@@ -1,8 +1,10 @@
 POST http://localhost:3001/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFobWVkZWxzaGVoZSIsImlkIjoiNjQxYmJiMWRkYTI2ZWRjOTY1MGZmMDE1IiwiaWF0IjoxNjc5NTQ3MjI1LCJleHAiOjE2Nzk1NTA4MjV9.GDqL3Q-8zu5-Va5uD00y3ah2RZfZPRYpQBhkJrBm3Go
+
 
 {
-  "title": "Test Title 2",
+  "title": " Auth 2 Test Title 2",
   "author": "TEst Author 2",
     "url": "www.test2.com",
     "likes": 66
